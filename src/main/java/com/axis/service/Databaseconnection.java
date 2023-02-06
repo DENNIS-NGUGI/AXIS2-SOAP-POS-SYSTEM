@@ -6,7 +6,7 @@ import java.sql.DriverManager;
 public class Databaseconnection {
     static final String DB_DRIVER = "com.mysql.jdbc.Driver";
 	static final String DB_URL = "jdbc:mysql://localhost:3306/supermart";
-	static final String DB_USERNAME = "root1";
+	static final String DB_USERNAME = "root";
 	static final String DB_PASSWORD = "root";
 	
 	static Connection connection = null;

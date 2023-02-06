@@ -162,5 +162,44 @@ public class Supercontroller extends HttpServlet{
 		}
 		
 	}
+	
+	
+	protected void doDeletePurchase(HttpServletRequest request, HttpServletResponse response) {
+		int product_id = Integer.parseInt(request.getParameter("productid"));
+		
+		try {
+			 Superservice.deletePurchase(product_id);
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void doUpdatePurchase(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+		int productid = Integer.parseInt(request.getParameter("productid"));
+		String productname = request.getParameter("productname");
+		float buyingprice = Float.parseFloat(request.getParameter("buyingprice"));
+		int supplierid = Integer.parseInt(request.getParameter("supplierid"));
+		int qtybought = Integer.parseInt(request.getParameter("qtybought"));
+		
+		Stockpurchase purchase = new Stockpurchase();
+		purchase.setProductid(productid);
+		purchase.setProductname(productname);
+		purchase.setBuyingprice(buyingprice);
+		purchase.setSupplierid(supplierid);
+		purchase.setQtybought(qtybought);
+		
+	try {
+		int res = Superservice.updatePurchase(purchase);
+		if (res==0) {
+			HttpSession session = request.getSession(true);
+			session.setAttribute("Error", "Unable to update purchase");
+		} else {
+			HttpSession session = request.getSession(true);
+			session.setAttribute("Valid", "Purchase updated");
+		}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 }
