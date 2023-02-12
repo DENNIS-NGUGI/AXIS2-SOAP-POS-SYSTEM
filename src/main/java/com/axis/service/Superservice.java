@@ -6,6 +6,8 @@ import java.sql.SQLException;
 //import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+
 import com.axis.model.*;
 
 
@@ -15,13 +17,12 @@ public class Superservice {
 		String INPUT_USER = "INSERT INTO supplier" +
 	"(supplierid, suppliername, contact) VALUES (?, ?, ?);";
 		int insertResult = 0;
+		Connection con=null;
 		
 		try
 		{
-			//Class.forName("com.mysql.cj.jdbc.Driver");
-			//Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermart?serverTimezone=UTC","root","10960301n.");
 			
-			Connection con = Databaseconnection.connectDB();
+		    con = Databaseconnection.connectDB();
 			//create a statement using Connection object
 	
 			PreparedStatement statement = con.prepareStatement(INPUT_USER);
@@ -36,8 +37,78 @@ public class Superservice {
 		{
 			System.out.println(e);
 		}
+		finally {
+			try {
+				if (con != null) {
+					con.close();
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
 		
 		return insertResult;
+		
+	}
+	
+	
+	
+	public static int RegisterUser(User user) throws ClassNotFoundException {
+		String INPUT_USER = "INSERT INTO user" +
+	"(username, useremail, password) VALUES (?, ?, ?);";
+		int insertResult = 0;
+		
+		try
+		{
+			
+			Connection con = Databaseconnection.connectDB();
+			//create a statement using Connection object
+	
+			PreparedStatement statement = con.prepareStatement(INPUT_USER);
+			
+			statement.setString(1,user.getUsername());
+			statement.setString(2, user.getUseremail());
+			statement.setString(3, user.getPassword());
+			
+			insertResult = statement.executeUpdate();		
+			
+		}catch(Exception e)
+		{
+			System.out.println(e);
+		}
+		
+		return insertResult;
+		
+	}
+	
+	
+	public void Login(User user) throws SQLException {
+		String query = "SELECT * from user where useremail=? AND password=?";
+		ResultSet resultSet = null;
+		try {
+			Connection connection = Databaseconnection.connectDB();
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setString(1, user.getUseremail());
+			statement.setString(2, user.getPassword());	
+			//statement.setString(3, user.getUsername());	
+			resultSet = statement.executeQuery();
+			
+			
+			if(resultSet.next()) {
+				user.setUseremail(resultSet.getString("username"));
+				System.out.println(resultSet.getString("username")  + " " + ", you have logged in Succesfully");
+				//Decision();
+		
+			}
+			else {
+				System.out.println("Unable to login");
+				System.exit(0);
+				
+			}
+		}finally {
+			DbUtil.close(resultSet);
+
+		}
 		
 	}
 	
@@ -48,8 +119,6 @@ public class Superservice {
 		
 		try
 		{
-			//Class.forName("com.mysql.cj.jdbc.Driver");
-			//Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermart?serverTimezone=UTC","root","10960301n.");
 			
 			Connection con = Databaseconnection.connectDB();
 			//create a statement using Connection object
@@ -71,6 +140,10 @@ public class Superservice {
 		return insertResult;
 		
 	}
+	
+	
+	
+	
 	
 	public static int computeSales(Sales sales) throws ClassNotFoundException {
 		String INPUT_USER = "INSERT INTO sales" +
@@ -101,11 +174,12 @@ public class Superservice {
 			System.out.println(e);
 		}
 		
-		return insertResult;
+		return insertResult;	
 		
 	}
 	
 	
+
 	public static int stockPurchase(Stockpurchase stockpurchase) throws ClassNotFoundException {
 		String INPUT_USER = "INSERT INTO stockpurchase" +
 	"(productid, productname, supplierid, qtybought, buyingprice) VALUES (?, ?, ?, ?, ?);";
@@ -139,65 +213,7 @@ public class Superservice {
 		return insertResult;
 		
 	}
-	
 
-	/*public Stockpurchase getPurchase(int productid) throws SQLException { 
-		String GET_USER = "SELECT * FROM stockpurchase WHERE productid="+ productid;
-		Stockpurchase purchase = null;
-		ResultSet resultSet = null;
-		try {
-			Connection connection = Databaseconnection.connectDB();
-			PreparedStatement statement = connection.prepareStatement(GET_USER);
-			//Statement statement = connection.createStatement();
-			resultSet = statement.executeQuery(GET_USER);
-			
-			if(resultSet.next()) {
-								
-				statement.setInt(1,purchase.getProductid());
-				statement.setString(2,purchase.getProductname());
-				statement.setInt(3,purchase.getSupplierid());
-				statement.setInt(4,purchase.getQtybought());
-				statement.setFloat(5,purchase.getBuyingprice());
-
-			}
-		}finally {
-			DbUtil.close(resultSet);
-			//DbUtil.close(connection);
-			//DbUtil.close(statement);
-		}
-		return purchase;
-	}
-	@SuppressWarnings("unused")
-	public static List<Stockpurchase> fetch(int productid){
-		
-		Stockpurchase purchase=null;
-		List<Stockpurchase> l = new ArrayList<Stockpurchase>();
-		try {
-			Connection connection = Databaseconnection.connectDB();
-			String GET_USER = "SELECT * FROM stockpurchase WHERE productid=" + productid;
-			PreparedStatement statement = connection.prepareStatement(GET_USER);
-			//Statement statement = connection.createStatement();
-			ResultSet rs= statement.executeQuery(GET_USER);
-			int i = 1;
-			
-				
-			while(rs.next()) {
-				
-				purchase = new Stockpurchase();
-				purchase.setProductid(rs.getInt(1));
-				purchase.setProductname(rs.getString(2));
-				purchase.setSupplierid(rs.getInt(3));
-				purchase.setQtybought(rs.getInt(4));
-				purchase.setBuyingprice(rs.getFloat(5));
-								
-
-
-			}}
-			catch(Exception e) {System.out.println(e);}
-			
-		return l;
-	}*/
-	
 	public Stockpurchase getPurchase(int productid) throws SQLException {
 		String query = "SELECT * FROM stockpurchase WHERE productid="+productid;
 		Stockpurchase purchase = null;
@@ -272,7 +288,10 @@ public class Superservice {
 				stock.setQty(resultSet.getInt("qty"));
 				stock.setSellingprice(resultSet.getFloat("sellingprice"));
 
-				
+				System.out.println("Stock ID: " + resultSet.getInt("stockid"));
+				System.out.println("Product ID: " + resultSet.getInt("productid"));
+				System.out.println("Qty Available: " + resultSet.getInt("qty"));
+				System.out.println("Selling Price: " + resultSet.getFloat("sellingprice"));
 				list.add(stock);
 			}
 		}finally {
@@ -282,12 +301,13 @@ public class Superservice {
 		return list;
 	}
 	public static int deletePurchase(int productid) throws ClassNotFoundException {
-		String query = "DELETE FROM Stockpurchase WHERE productid="+productid+";";
+		String query = "DELETE FROM Stockpurchase WHERE productid=?";
 		int insertResult = 0;
 		
 		try{
 			Connection con = Databaseconnection.connectDB();
 			PreparedStatement statement = con.prepareStatement(query);
+			statement.setInt(1, productid);
 			insertResult = statement.executeUpdate();		
 			
 		}catch(Exception e){
@@ -319,9 +339,50 @@ public class Superservice {
 
 	}
 	
-
-
 	
+	public static int getInvoice(int productid) throws SQLException {
+		String query = "SELECT stockpurchase.productid, stockpurchase.productname, stockpurchase.buyingprice, sales.qtysold,sales.total,sales.customername,sales.servedby FROM stockpurchase,sales WHERE stockpurchase.productid=sales.productid=?";
+		Stockpurchase purchase = null;
+		Sales sales = null;
+		ResultSet resultSet = null;
+		try {
+			Connection connection = Databaseconnection.connectDB();
+			PreparedStatement statement = connection.prepareStatement(query);
+			statement.setInt(1, productid);
+			
+			resultSet = statement.executeQuery();
+			
+			if(resultSet.next()) {
+				purchase = new Stockpurchase();
+				sales = new Sales();
+				purchase.setProductid(resultSet.getInt("productid"));
+				purchase.setProductname(resultSet.getString("productname"));
+				purchase.setBuyingprice(resultSet.getFloat("buyingprice"));
+				sales.setQtysold(resultSet.getInt("qtysold"));
+				sales.setProductid(resultSet.getInt("productid"));
+				sales.setTotal(resultSet.getFloat("total"));
+				sales.setCustomername(resultSet.getString("customername"));
+				sales.setServedby(resultSet.getString("servedby"));
+				
+				System.out.println("Product ID: " +  resultSet.getInt("productid"));
+				System.out.println("Product Name: " +  resultSet.getString("productname"));
+				System.out.println("Buying Price: " +  resultSet.getFloat("buyingprice"));
+				System.out.println("Quantity Sold: " +  resultSet.getInt("qtysold"));
+				System.out.println("Total: " +  resultSet.getFloat("total"));
+				System.out.println("Customer Name: " +  resultSet.getString("customername"));
+				System.out.println("Served By: " +  resultSet.getString("servedby"));
+	
+				
+			}
+			else {
+				System.out.println("NO DATA");
+			}
+		}finally {
+			DbUtil.close(resultSet);
+
+		}
+		return 1;
+	}
 	
 	
 }
