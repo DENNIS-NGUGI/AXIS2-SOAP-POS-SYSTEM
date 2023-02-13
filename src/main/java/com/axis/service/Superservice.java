@@ -9,6 +9,7 @@ import java.util.List;
 
 
 import com.axis.model.*;
+import com.mysql.cj.xdevapi.Statement;
 
 
 
@@ -181,19 +182,12 @@ public class Superservice {
 	
 
 	public static int stockPurchase(Stockpurchase stockpurchase) throws ClassNotFoundException {
-		String INPUT_USER = "INSERT INTO stockpurchase" +
-	"(productid, productname, supplierid, qtybought, buyingprice) VALUES (?, ?, ?, ?, ?);";
+		String INPUT_USER = "INSERT INTO stockpurchase (productid, productname, supplierid, qtybought, buyingprice) VALUES (?, ?, ?, ?, ?)";
 		int insertResult = 0;
 		
 		try
 		{
-			//Class.forName("com.mysql.cj.jdbc.Driver");
-			//Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/supermart?serverTimezone=UTC","root","10960301n.");
-			
 			Connection con = Databaseconnection.connectDB();
-			//create a statement using Connection object
-			
-	
 			PreparedStatement statement = con.prepareStatement(INPUT_USER);
 			
 			statement.setInt(1,stockpurchase.getProductid());
@@ -201,9 +195,10 @@ public class Superservice {
 			statement.setInt(3,stockpurchase.getSupplierid());
 			statement.setInt(4,stockpurchase.getQtybought());
 			statement.setFloat(5,stockpurchase.getBuyingprice());
-
+			insertResult = statement.executeUpdate();
+			addPurchaseToStock(stockpurchase);
 			
-			insertResult = statement.executeUpdate();		
+			
 			
 		}catch(Exception e)
 		{
@@ -213,8 +208,8 @@ public class Superservice {
 		return insertResult;
 		
 	}
-
-	public Stockpurchase getPurchase(int productid) throws SQLException {
+	
+		public Stockpurchase getPurchase(int productid) throws SQLException {
 		String query = "SELECT * FROM stockpurchase WHERE productid="+productid;
 		Stockpurchase purchase = null;
 		ResultSet resultSet = null;
@@ -237,6 +232,50 @@ public class Superservice {
 		}
 		return purchase;
 	}
+		
+		public static int addPurchaseToStock(Stockpurchase stockpurchase) throws SQLException, ClassNotFoundException {
+			String query = "SELECT * FROM stock WHERE productid=?";
+			Stock stock = null;
+			int updateResult = 0;
+			int qty, qtybought, total_quantity;
+			ResultSet resultSet = null;
+			try {
+				Connection connection = Databaseconnection.connectDB();
+				PreparedStatement statement = connection.prepareStatement(query);
+				statement.setInt(1, stockpurchase.getProductid());
+				resultSet = statement.executeQuery();
+				
+				if(resultSet.next()) {
+					stock = new Stock();
+					qty = resultSet.getInt("qty");
+					qtybought = stockpurchase.getQtybought();
+					total_quantity = qty + qtybought;
+					stock.setStockid(resultSet.getInt("stockid"));
+					stock.setProductid(resultSet.getInt("productid"));
+					stock.setQty(total_quantity);
+					stock.setSellingprice(resultSet.getFloat("sellingprice"));
+					
+					if(qty==0 || qtybought==0 || total_quantity==0) {
+						System.out.println("Unable to increment stock");
+						System.exit(0);
+					}else {
+						try {
+							String query1 = "UPDATE stock SET qty=? WHERE productid=?;";
+							statement = connection.prepareStatement(query1);
+							statement.setInt(1, stock.getQty());
+							statement.setInt(2, stockpurchase.getProductid());
+							updateResult = statement.executeUpdate();
+					} catch (SQLException e) {
+						e.printStackTrace();
+					}
+				}
+				}
+			}catch(Exception e){
+				System.out.println(e);
+				System.exit(0);
+			}
+			return updateResult;
+		}
 	
 	
 	public List<Stockpurchase> getAllPurchases() throws SQLException {

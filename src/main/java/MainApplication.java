@@ -45,7 +45,7 @@ public class MainApplication {
 		}else {
 			
 			System.out.println("Wrong Input, Use y for Yes and n for No"  );
-			clearC();
+			//clearC();
 			main(args);
 			
 			
@@ -56,29 +56,29 @@ public class MainApplication {
 		}
 	
 	
-	public static void clearC() throws AWTException {
-
-
-        Robot robbie = new Robot();
-        //shows the Console View
-        robbie.keyPress(KeyEvent.VK_ALT);
-        robbie.keyPress(KeyEvent.VK_SHIFT);
-        robbie.keyPress(KeyEvent.VK_Q);
-        robbie.keyRelease(KeyEvent.VK_ALT);
-        robbie.keyPress(KeyEvent.VK_SHIFT);
-        robbie.keyPress(KeyEvent.VK_Q);
-        robbie.keyPress(KeyEvent.VK_C);
-        robbie.keyRelease(KeyEvent.VK_C);
-
-        //clears the console
-        robbie.keyPress(KeyEvent.VK_SHIFT);
-        robbie.keyPress(KeyEvent.VK_F10);
-        robbie.keyRelease(KeyEvent.VK_SHIFT);
-        robbie.keyRelease(KeyEvent.VK_F10);
-        robbie.keyPress(KeyEvent.VK_R);
-        robbie.keyRelease(KeyEvent.VK_R);
-		
-	}
+//	public static void clearC() throws AWTException {
+//
+//
+//        Robot robbie = new Robot();
+//        //shows the Console View
+//        robbie.keyPress(KeyEvent.VK_ALT);
+//        robbie.keyPress(KeyEvent.VK_SHIFT);
+//        robbie.keyPress(KeyEvent.VK_Q);
+//        robbie.keyRelease(KeyEvent.VK_ALT);
+//        robbie.keyPress(KeyEvent.VK_SHIFT);
+//        robbie.keyPress(KeyEvent.VK_Q);
+//        robbie.keyPress(KeyEvent.VK_C);
+//        robbie.keyRelease(KeyEvent.VK_C);
+//
+//        //clears the console
+//        robbie.keyPress(KeyEvent.VK_SHIFT);
+//        robbie.keyPress(KeyEvent.VK_F10);
+//        robbie.keyRelease(KeyEvent.VK_SHIFT);
+//        robbie.keyRelease(KeyEvent.VK_F10);
+//        robbie.keyPress(KeyEvent.VK_R);
+//        robbie.keyRelease(KeyEvent.VK_R);
+//		
+//	}
 		public static void Register() {
 		
 		String username, useremail, password;
@@ -307,6 +307,49 @@ public class MainApplication {
 			
 			Superservice.stockPurchase(purchase);
 			System.out.println("Stock Succesfully Inserted!");
+			Decision();
+			}
+		
+			
+		catch (Exception e)
+		{
+			System.out.println("Stock Not Inserted!");
+			e.printStackTrace();
+		}		
+	}
+	
+	public static void InsertStockP() {
+		
+		String productname;
+		int productid, qtybought, supplierid;
+		float buyingprice;
+
+		try {
+			Scanner scanner = new Scanner(System.in);
+			System.out.println("To Insert the Stock fill the form");
+			System.out.println("Product ID");
+			productid = Integer.parseInt(scanner.nextLine());
+			System.out.println("Product Name");
+			productname = scanner.nextLine();
+			System.out.println("Supplier ID");
+			supplierid = Integer.parseInt(scanner.nextLine());
+			System.out.println("Qty Bought");
+			qtybought = Integer.parseInt(scanner.nextLine());
+			System.out.println("Buying Price");
+			buyingprice = Float.parseFloat(scanner.nextLine());
+
+			
+			Stockpurchase purchase = new Stockpurchase();
+			purchase.setProductid(productid);
+			purchase.setProductname(productname);
+			purchase.setSupplierid(supplierid);
+			purchase.setQtybought(qtybought);
+			purchase.setBuyingprice(buyingprice);
+
+			
+//			Superservice.stockPurchase(purchase);
+			Superservice.stockPurchase(purchase);
+			//System.out.println("Stock Succesfully Inserted!");
 			Decision();
 			}
 		
